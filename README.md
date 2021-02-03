@@ -1,1 +1,1 @@
-# dc_GANS
+# dc_GAN
