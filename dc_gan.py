@@ -86,6 +86,43 @@ optimizerG = optim.Adam(netG.parameters(), lr = 0.0002, betas = (0.5, 0.999))
 
 for epoch in range(25):
 	for i, data in enumerate(dataloader, 0):
+
+		netD.zero_grad()
+
+		real, _ = data
+		input = Variable(real)
+		target = Variable(torch.ones(input.size()[0]))
+		output = netD(input)
+		errD_real = criterion(output, target)
+
+		noise = Variable(torch.randn(input.size()[0], 100, 1, 1))
+		fake = netG(noise)
+		target = Variable(torch.zeros(input.size()[0]))
+		output = netD(fake.detach())
+		errD_fake = criterion(output, target)
+
+		errD = errD_real + errD_fake
+		errD.backward()
+		optimizerD.step()
+
+		netG.zero_grad()
+		target = Variable(torch.ones(input.size()[0]))
+		output = netD(fake)
+		errG = criterion(output, target)
+		errG.backward()
+		optimizerG.step()
+
+		print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f' % (epoch, 25, i, len(dataloader), errD.data[0], errG.data[0]))
+
+		if i % 100 == 0:
+			vutils.save_image(real, '%s/real_samples.png' % "./results", normalize = True)
+			vutils.save_image(fake.data, '%s/fake_samples_epoch_%03d.png' % ("./results", epoch), normalize = True)
+
+
+
+
+
+
 		
 
 
